@@ -116,4 +116,55 @@ class FilterTest extends \PHPUnit\Framework\TestCase
         $input = '<details class="mce-accordion"><summary>Summary</summary><p>One</p><p>Two</p></details>';
         $this->assertSame($input, Filter::body($input));
     }
+
+    public function testBodyAllowsInteractiveFormControls(): void
+    {
+        // select with a selected option
+        $this->assertSame(
+            '<select name="protocol"><option value="a">A</option><option value="b" selected>B</option></select>',
+            Filter::body('<select name="protocol"><option value="a">A</option><option value="b" selected>B</option></select>'),
+        );
+        // radio buttons, one checked
+        $this->assertSame(
+            '<input type="radio" name="choice" value="1" checked><input type="radio" name="choice" value="2">',
+            Filter::body('<input type="radio" name="choice" value="1" checked><input type="radio" name="choice" value="2">'),
+        );
+        // checkbox
+        $this->assertSame(
+            '<input type="checkbox" name="done" value="yes" checked>',
+            Filter::body('<input type="checkbox" name="done" value="yes" checked>'),
+        );
+        // text input and label
+        $this->assertSame(
+            '<label><input type="text" name="notes" value="hello"> notes</label>',
+            Filter::body('<label><input type="text" name="notes" value="hello"> notes</label>'),
+        );
+        // button with data-action and data-script attributes
+        $this->assertSame(
+            '<button type="button" data-action="run-script" data-script="analyze.py">Run</button>',
+            Filter::body('<button type="button" data-action="run-script" data-script="analyze.py">Run</button>'),
+        );
+    }
+
+    public function testBodyStripsDangerousAttributesAndElements(): void
+    {
+        // event handler attributes are removed, the control itself survives
+        $this->assertSame(
+            '<input type="radio" checked value="">',
+            Filter::body('<input type="radio" onmouseover="alert(1)" checked>'),
+        );
+        // the form element itself is not allowed, only standalone controls
+        $this->assertSame(
+            '<input type="text">',
+            Filter::body('<form action="https://evil.example"><input type="text"></form>'),
+        );
+        // script remains stripped
+        $this->assertSame('', Filter::body('<script>alert(1)</script>'));
+        // submit/file input types are not allowed: the control is kept but downgraded to a bare input
+        $this->assertSame(
+            '<input value="go">',
+            Filter::body('<input type="submit" value="go">'),
+        );
+        $this->assertSame('<input>', Filter::body('<input type="file">'));
+    }
 }

@@ -194,6 +194,12 @@
       <input class='form-control col-md-3' type='url' value='{{ App.Config.configArr.chat_url }}' data-trigger='blur' data-model='config' data-target='chat_url' id='chat_url' />
     </div>
     <hr>
+    <div class='d-flex justify-content-between'>
+      <label for='script_runner_url' class='col-form-label'>{{ 'URL of the script runner service'|trans }}</label>
+      <input class='form-control col-md-3' type='url' value='{{ App.Config.configArr.script_runner_url }}' data-trigger='blur' data-model='config' data-target='script_runner_url' id='script_runner_url' placeholder='http://127.0.0.1:8765' />
+    </div>
+    <p class='smallgray'>{{ 'URL of the service that runs the scripts triggered from the body of an entry (buttons with data-action="run-script"). Leave empty to disable. Must not be exposed to the internet.'|trans }}</p>
+    <hr>
 
     {% include 'binary-setting.html' with {'label': 'Allow users to change their first name, last name, internal id or email address'|trans, 'slug': 'allow_users_change_identity', 'help': 'When disabled, only a Sysadmin will be allowed to modify these parameters.'|trans} %}
 

@@ -12,6 +12,8 @@ import { entity } from './getEntity';
 import { on } from './handlers';
 import i18next from './i18n';
 import { Action, Model } from './interfaces';
+import { bindBodyControls } from './body-controls';
+import { runScript } from './run-script';
 import { reloadElements } from './misc';
 
 // UPDATE MALLEABLE COMMENT
@@ -64,3 +66,8 @@ if (!core.isAnon) {
   // listen on existing comments
   malleableComments.listen();
 }
+
+// persist the interactive controls (select, radio, checkbox, text) of the body
+bindBodyControls();
+// handle buttons marked with data-action="run-script"
+runScript();

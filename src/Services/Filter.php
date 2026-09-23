@@ -197,7 +197,14 @@ final class Filter
         // create base config for html5
         $config = HTMLPurifier_HTML5Config::createDefault();
         // allow only certain elements
-        $config->set('HTML.Allowed', 'div[class|style],br,p[class|style],sub,img[src|class|style|width|height],sup,strong,b,em,u,a[href|target],s,span[style],ul[style],li[style],ol[style],dl,dt,dd,blockquote,h1[class|style],h2[class|style],h3[class|style],h4[class|style],h5[class|style],h6[class|style],hr,table[style|data-table-sort|border],tr[style],td[style|colspan|rowspan],th[style|colspan|rowspan],code,source[src|type],video[src|controls|style|width|height],audio[src|controls],pre[class],details[class|open],summary,caption,figure,figcaption');
+        $config->set('HTML.Allowed', 'div[class|style],br,p[class|style],sub,img[src|class|style|width|height],sup,strong,b,em,u,a[href|target],s,span[style],ul[style],li[style],ol[style],dl,dt,dd,blockquote,h1[class|style],h2[class|style],h3[class|style],h4[class|style],h5[class|style],h6[class|style],hr,table[style|data-table-sort|border],tr[style],td[style|colspan|rowspan],th[style|colspan|rowspan],code,source[src|type],video[src|controls|style|width|height],audio[src|controls],pre[class],details[class|open],summary,caption,figure,figcaption,select[name|class|style|data-action|data-script],option[value|selected|class|style],input[type|name|value|checked|class|style|placeholder|data-action|data-script],label[class|style],fieldset[class|style],legend[class|style],button[type|name|class|style|data-action|data-script]');
+        // permit the form controls needed for interactive experiment bodies
+        // (select, option, input radio/checkbox/text, button)
+        $config->set('HTML.Forms', true);
+        // only allow harmless input types, no submit/file/image that could act on real forms
+        $config->set('Attr.AllowedInputTypes', array('text', 'radio', 'checkbox'));
+        // standalone controls only, no complete forms or textareas
+        $config->set('HTML.ForbiddenElements', array('form', 'textarea'));
         $config->set('Attr.AllowedFrameTargets', array('_blank'));
         $config->set('HTML.TargetBlank', true);
         // configure the cache for htmlpurifier
@@ -265,6 +272,17 @@ final class Filter
         if ($def = $config->maybeGetRawHTMLDefinition()) {
             $def->addAttribute('table', 'data-table-sort', 'Enum#true');
             $def->addAttribute('table', 'border', 'Pixels');
+            // data-action/data-script let authors mark controls in the body as interactive
+            $def->addAttribute('div', 'data-action', 'Text');
+            $def->addAttribute('span', 'data-action', 'Text');
+            $def->addAttribute('select', 'data-action', 'Text');
+            $def->addAttribute('input', 'data-action', 'Text');
+            $def->addAttribute('button', 'data-action', 'Text');
+            $def->addAttribute('div', 'data-script', 'Text');
+            $def->addAttribute('span', 'data-script', 'Text');
+            $def->addAttribute('select', 'data-script', 'Text');
+            $def->addAttribute('input', 'data-script', 'Text');
+            $def->addAttribute('button', 'data-script', 'Text');
         }
 
         $purifier = new HTMLPurifier($config);

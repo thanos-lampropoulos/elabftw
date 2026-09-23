@@ -416,6 +416,34 @@ export function getTinymceBaseConfig(page: string): object {
           }, 50);
         }
       });
+      // The interactive controls (select, radio, checkbox, text) of the body hold their
+      // state in DOM properties, which are not serialized by default. Sync them to
+      // attributes so the state of the controls is present in the saved body.
+      editor.on('BeforeGetContent', () => {
+        const sync = (root: Document) => {
+          root.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((input: HTMLInputElement) => {
+            if (input.checked) {
+              input.setAttribute('checked', 'checked');
+            } else {
+              input.removeAttribute('checked');
+            }
+          });
+          root.querySelectorAll('input[type="text"]').forEach((input: HTMLInputElement) => {
+            input.setAttribute('value', input.value);
+          });
+          root.querySelectorAll('select').forEach((select: HTMLSelectElement) => {
+            Array.from(select.options).forEach(option => {
+              if (option.selected) {
+                option.setAttribute('selected', 'selected');
+              } else {
+                option.removeAttribute('selected');
+              }
+            });
+          });
+        };
+        sync(editor.getDoc());
+        sync(editor.dom.doc);
+      });
       editor.on('GetContent', (e) => {
         // prevent tables width from being set to "auto" and cause pdf export issues (see #5601)
         e.content = e.content.replace(/(<table[^>]*?)\sstyle="[^"]*?width\s*:\s*auto;?[^"]*?"([^>]*?>)/gi, '$1$2');

@@ -156,6 +156,7 @@ final class Config extends AbstractRest
             ('max_revisions', '10'),
             ('min_delta_revisions', '100'),
             ('min_days_revisions', '23'),
+            ('script_runner_url', ''),
             ('extauth_remote_user', ''),
             ('extauth_firstname', ''),
             ('extauth_lastname', ''),
